@@ -2,6 +2,7 @@ import os
 import rasterio
 import json
 from xml.dom import minidom
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -43,7 +44,7 @@ class Scene(object):
         rasters = {}
         for raster_idx, band in enumerate(bands, 1):
             with rasterio.open(filename) as f:
-                rasters[band] = f.read(raster_idx)
+                rasters[band] = f.read(raster_idx).astype(float)
         return rasters
 
     def load_scenes(self):
@@ -74,6 +75,7 @@ class Scene(object):
         return band * coeff
 
     def calculate_ndvi(self, convert_to_toa=True):
+        np.seterr(divide='ignore', invalid='ignore')
         if convert_to_toa:
             nir = self._load_scene_toa_reflectance('nir')
             red = self._load_scene_toa_reflectance('red')
