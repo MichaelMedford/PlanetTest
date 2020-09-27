@@ -2,6 +2,7 @@ import os
 import rasterio
 import json
 import xml.etree.ElementTree as ET
+import matplotlib.pyplot as plt
 
 
 class Scene(object):
@@ -57,3 +58,24 @@ class Scene(object):
         with open(self.filename_metadata_json) as f:
             metadata_json = json.load(f)
         return metadata_json
+
+    def _plot_bands(self, fig, ax, bands, labels, ext):
+        fig.suptitle(self.filename_base + f' {ext}')
+        ax = ax.flatten()
+        for i, band in enumerate(labels):
+            ax[i].set_title(band, fontsize=12)
+            ax[i].imshow(bands[band], cmap='viridis')
+        fig.tight_layout()
+        fig.subplots_adjust(top=.95)
+        fname = self.filename_base + f'_{ext}.png'
+        fig.savefig(fname, dpi=75)
+        print(f'{fname} saved')
+        plt.close(fig)
+
+    def plot_scenes(self):
+        fig, ax = plt.subplots(2, 2, figsize=(8, 8))
+        self._plot_bands(fig, ax, self.scenes, self.scene_bands, 'scenes')
+
+    def plot_udm2(self):
+        fig, ax = plt.subplots(4, 2, figsize=(8, 12))
+        self._plot_bands(fig, ax, self.udm2, self.udm2_bands, 'udm2')
