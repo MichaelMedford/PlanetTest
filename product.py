@@ -11,6 +11,7 @@ class Scene(object):
     def __init__(self, filename):
         # parse filenames
         self.filename_base = self.parse_filename_base(filename)
+        print('Loading {}'.format(self.filename_base))
         self.filename_scene = f'{self.filename_base}_3B_AnalyticMS_clip.tif'
         self.filename_metadata_xml = f'{self.filename_base}_3B_' \
                                      f'AnalyticMS_metadata_clip.xml'
@@ -41,7 +42,6 @@ class Scene(object):
                 raise FileNotFoundError(f'{filename} missing')
 
     def _load_rasters(self, filename, bands, raster_type):
-        print(f'{self.filename_base}: loading {raster_type}')
         rasters = {}
         for raster_idx, band in enumerate(bands, 1):
             with rasterio.open(filename) as f:
@@ -92,7 +92,32 @@ class Scene(object):
         else:
             nir = self.scenes['nir']
             red = self.scenes['red']
-        return (nir - red) / (nir + red)
+        ndvi = (nir - red) / (nir + red)
+        return np.nan_to_num(ndvi)
+
+    def calculate_evi(self, convert_to_toa=True):
+        np.seterr(divide='ignore', invalid='ignore')
+        if convert_to_toa:
+            nir = self._load_scene_toa_reflectance('nir')
+            red = self._load_scene_toa_reflectance('red')
+            blue = self._load_scene_toa_reflectance('blue')
+        else:
+            nir = self.scenes['nir']
+            red = self.scenes['red']
+            blue = self.scenes['blue']
+        evi = 2.5 * (nir - red) / (nir + 6 * red - 7.5 * blue + 1)
+        return np.nan_to_num(evi)
+
+    def calculate_ndwi(self, convert_to_toa=True):
+        np.seterr(divide='ignore', invalid='ignore')
+        if convert_to_toa:
+            nir = self._load_scene_toa_reflectance('nir')
+            green = self._load_scene_toa_reflectance('green')
+        else:
+            nir = self.scenes['nir']
+            green = self.scenes['green']
+        ndwi = (green - nir) / (green + nir)
+        return np.nan_to_num(ndwi)
 
     def _plot_bands(self, fig, ax, bands, labels, ext):
         fig.suptitle(self.filename_base + f' {ext}')
