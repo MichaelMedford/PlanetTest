@@ -90,13 +90,14 @@ def plot_ndvi_trends(scene_arr, remove_first_image=False,
     delta_days_arr = generate_delta_days(acquired_arr)
     ndvi_rate_of_change = (ndvi_med_arr[1:] - ndvi_med_arr[
                                               :-1]) / delta_days_arr
-    fig, ax = plt.subplots(2, 1, figsize=(12, 6))
+    fig, ax = plt.subplots(2, 1, figsize=(8, 6))
     fig.suptitle(f'Presence of Green Vegetation | '
-                 f'{water_mask_percentile} Precentile Water Mask')
-    ax[0].errorbar(acquired_arr, ndvi_med_arr, yerr=ndvi_std_arr)
+                 f'{water_mask_percentile} Percentile Water Mask', fontsize=14)
+    ax[0].errorbar(acquired_arr, ndvi_med_arr, yerr=ndvi_std_arr, lw=5)
     ax[0].set_ylabel('NDVI')
     ax[0].set_ylim(.4, .9)
-    ax[1].plot(acquired_arr[:-1], ndvi_rate_of_change, marker='.', ms=10)
+    ax[1].plot(acquired_arr[:-1], ndvi_rate_of_change, marker='s',
+               ms=10, lw=5)
     ax[1].set_ylabel(r'$\delta$(NDVI) / day')
     ax[1].set_ylim(-.02, .08)
     ax[1].set_xlim(ax[0].get_xlim())
@@ -127,7 +128,7 @@ def plot_water_mask(scene_arr):
     ndvi_stats = calculate_ndvi_stats(scene_arr, water_mask_percentile=50)
     _, ndvi_med_arr_clipped, ndvi_std_arr_clipped = ndvi_stats
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(8, 6))
     fig.suptitle('Presence of Green Vegetation')
     ax.errorbar(acquired_arr, ndvi_med_arr_raw, yerr=ndvi_std_arr_raw,
                 color='g', label='No Water Mask', lw=5)
