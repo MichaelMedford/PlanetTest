@@ -87,11 +87,20 @@ class Scene(object):
         coeff = nodes[band_idx].getElementsByTagName("ps:reflectanceCoefficient")[0].firstChild.data
         return float(coeff)
 
-    def _load_scene_toa_reflectance(self, scene_band):
-        band = self.images[scene_band]
-        band_idx = self.image_bands[scene_band] - 1
+    def _load_scene_toa_reflectance(self, image_band):
+        band = self.images[image_band]
+        band_idx = self.image_bands[image_band] - 1
         coeff = self._load_toa_reflectance_coeff(band_idx)
         return band * coeff
+
+    def calculate_percentile_mask(self, image_band, percentile,
+                                  convert_to_toa=True):
+        if convert_to_toa:
+            image = self._load_scene_toa_reflectance(image_band)
+        else:
+            image = self.images[image_band]
+        thresh = np.percentile(image, percentile)
+        return image < thresh
 
     def calculate_rgb(self, convert_to_toa=True):
         np.seterr(divide='ignore', invalid='ignore')
