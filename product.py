@@ -84,6 +84,23 @@ class Scene(object):
         coeff = self._load_toa_reflectance_coeff(band_idx)
         return band * coeff
 
+    def calculate_rgb(self, convert_to_toa=True):
+        np.seterr(divide='ignore', invalid='ignore')
+        if convert_to_toa:
+            red = self._load_scene_toa_reflectance('red')
+            green = self._load_scene_toa_reflectance('green')
+            blue = self._load_scene_toa_reflectance('blue')
+        else:
+            red = self.scenes['red']
+            green = self.scenes['green']
+            blue = self.scenes['blue']
+        image_shape = red.shape
+        rgb = np.zeros((image_shape[0], image_shape[1], 3))
+        rgb[:, :, 0] = red / np.max(red)
+        rgb[:, :, 1] = green / np.max(green)
+        rgb[:, :, 2] = blue / np.max(blue)
+        return np.nan_to_num(rgb)
+
     def calculate_ndvi(self, convert_to_toa=True):
         np.seterr(divide='ignore', invalid='ignore')
         if convert_to_toa:
@@ -135,6 +152,12 @@ class Scene(object):
     def plot_scenes(self):
         fig, ax = plt.subplots(2, 2, figsize=(8, 8))
         self._plot_bands(fig, ax, self.scenes, self.scene_bands, 'scenes')
+
+    def plot_rgb(self):
+        rgb = self.calculate_rgb()
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.imshow(rgb)
+
 
     def plot_udm2(self):
         fig, ax = plt.subplots(4, 2, figsize=(8, 12))
