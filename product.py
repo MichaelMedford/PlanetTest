@@ -4,6 +4,7 @@ import json
 from xml.dom import minidom
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 
 class Scene(object):
@@ -62,6 +63,15 @@ class Scene(object):
         with open(self.filename_metadata_json) as f:
             metadata_json = json.load(f)
         return metadata_json
+
+    @property
+    def acquired(self):
+        return datetime.strptime(self.metadata_json['properties']['acquired'],
+                                 '%Y-%m-%dT%H:%M:%S.%fz')
+
+    @property
+    def acquired_label(self):
+        return self.acquired.strftime('%Y-%m-%d')
 
     def _load_toa_reflectance_coeff(self, band_idx):
         nodes = self.metadata_xml.getElementsByTagName("ps:bandSpecificMetadata")
