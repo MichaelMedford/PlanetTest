@@ -1,3 +1,5 @@
+#!python
+
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +15,8 @@ except ModuleNotFoundError:
 from product import Scene
 
 
-def load_scenes(remove_first_image):
+def load_scenes(remove_first_image=False):
+    print('Loading scenes...')
     fname_arr = glob.glob('data/*AnalyticMS_clip.tif')
     fname_arr.sort()
 
@@ -31,6 +34,7 @@ def load_scenes(remove_first_image):
                 scene = Scene(fname, row_clip=15)
         scene_arr.append(scene)
 
+    print('\n')
     return scene_arr
 
 
@@ -70,7 +74,16 @@ def generate_delta_days(acquired_arr):
     return np.array(delta_days_arr)
 
 
-def plot_ndvi_trends(scene_arr, water_mask_percentile=50):
+def plot_iamges_and_masks(scene_arr):
+    print('Plotting images and masks...')
+    for scene in scene_arr:
+        scene.plot_images()
+        scene.plot_udm2()
+    print('\n')
+
+
+def plot_ndvi_trends(scene_arr, remove_first_image=False,
+                     water_mask_percentile=50):
     ndvi_stats = calculate_ndvi_stats(scene_arr,
                                       water_mask_percentile=water_mask_percentile)
     acquired_arr, ndvi_med_arr, ndvi_std_arr = ndvi_stats
@@ -80,12 +93,13 @@ def plot_ndvi_trends(scene_arr, water_mask_percentile=50):
     ndvi_rate_of_change = (ndvi_med_arr[1:] - ndvi_med_arr[
                                               :-1]) / delta_days_arr
     fig, ax = plt.subplots(2, 1, figsize=(12, 6))
-    ax[0].set_title('Presence of Green Vegetation')
+    fig.suptitle('Presence of Green Vegetation')
     ax[0].errorbar(acquired_arr, ndvi_med_arr, yerr=ndvi_std_arr)
-    ax[0].set_ylabel(r'NDVI $(NIR - red) / (NIR + red)$')
+    ax[0].set_ylabel('NDVI')
     ax[0].set_ylim(.4, .9)
     ax[1].plot(acquired_arr[:-1], ndvi_rate_of_change, marker='.', ms=10)
     ax[1].set_ylabel(r'$\delta$(NDVI) / day')
+    ax[1].set_ylim(-.02, .08)
     ax[1].set_xlim(ax[0].get_xlim())
     ax[1].axhline(0, color='k', alpha=.5)
 
@@ -100,14 +114,19 @@ def plot_ndvi_trends(scene_arr, water_mask_percentile=50):
     fig.tight_layout()
     fig.subplots_adjust(top=.9)
 
-    fname = 'figures/ndvi_trends.png'
-    fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.01)
+    fname = 'figures/ndvi_trends'
+    if remove_first_image:
+        fname += '_clipped'
+    fname += f'_blue{water_mask_percentile}.png'
+    fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.05)
     print(f'{fname} saved')
 
 
 def analyze_scenes(remove_first_image, water_mask_percentile):
     scene_arr = load_scenes(remove_first_image=remove_first_image)
-    plot_ndvi_trends(scene_arr, water_mask_percentile=water_mask_percentile)
+    plot_iamges_and_masks(scene_arr)
+    plot_ndvi_trends(scene_arr, remove_first_image=remove_first_image,
+                     water_mask_percentile=water_mask_percentile)
 
 
 def main():

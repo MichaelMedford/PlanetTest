@@ -167,17 +167,16 @@ class Scene(object):
         print(f'{fname} saved')
         plt.close(fig)
 
-    def plot_scenes(self):
+    def plot_images(self):
         fig, ax = plt.subplots(2, 2, figsize=(8, 8))
         self._plot_bands(fig, ax, self.images, self.image_bands, 'scenes')
+
+    def plot_udm2(self):
+        fig, ax = plt.subplots(4, 2, figsize=(8, 12))
+        self._plot_bands(fig, ax, self.udm2, self.udm2_bands, 'udm2')
 
     def plot_rgb(self):
         rgb = self.calculate_rgb()
         fig, ax = plt.subplots(figsize=(8, 8))
         ax.imshow(rgb)
-
-
-    def plot_udm2(self):
-        fig, ax = plt.subplots(4, 2, figsize=(8, 12))
-        self._plot_bands(fig, ax, self.udm2, self.udm2_bands, 'udm2')
 
