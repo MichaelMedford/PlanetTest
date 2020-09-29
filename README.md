@@ -2,9 +2,10 @@
 
 ### Outline
 
-This document outlines the implementation of the functions used 
+This README outlines the implementation of the functions used 
 throughout the analysis. For analysis of the scenes using these tools, please 
-read the **Analysis.ipynb**.
+read the `Analysis.ipynb`. For figures that are the results of this 
+analysis, please see the `Figures` folder.
 
 ### Measuring Vegetative Health
 Measuring the rate of change from green vegetation to bare soil
