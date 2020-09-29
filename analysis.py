@@ -32,6 +32,7 @@ def load_scenes(remove_first_image=False):
                 scene = Scene(fname)
             else:
                 scene = Scene(fname, row_clip=15)
+                print('-- row_clip on')
         scene_arr.append(scene)
 
     return scene_arr
@@ -122,7 +123,7 @@ def plot_ndvi_trends(scene_arr, remove_first_image=False,
     print(f'{fname} saved')
 
 
-def plot_water_mask(scene_arr):
+def plot_ndvi_trends_water_mask(scene_arr):
     ndvi_stats = calculate_ndvi_stats(scene_arr, water_mask_percentile=100)
     acquired_arr, ndvi_med_arr_raw, ndvi_std_arr_raw = ndvi_stats
     ndvi_stats = calculate_ndvi_stats(scene_arr, water_mask_percentile=50)
@@ -147,6 +148,36 @@ def plot_water_mask(scene_arr):
     fig.tight_layout()
     fig.subplots_adjust(top=.9)
 
+    fname = 'figures/ndvi_trends_water_mask.png'
+    fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.05)
+    print(f'{fname} saved')
+
+
+def plot_water_mask(scene_arr, water_mask_percentile):
+    scene = scene_arr[0]
+    blue = scene.images['blue']
+    mask_water = scene.calculate_percentile_mask('blue',
+                                                 water_mask_percentile)
+
+    blue_below_threshold = np.zeros_like(blue)
+    blue_below_threshold[:] = blue
+    blue_below_threshold[mask_water] = 0
+
+    blue_above_threshold = np.zeros_like(blue)
+    blue_above_threshold[:] = blue
+    blue_above_threshold[~mask_water] = 0
+
+    fig, ax = plt.subplots(1, 2, figsize=(6, 3))
+    fig.suptitle('Effect of Water Mask')
+    ax[0].set_title('Above Water Mask Threshold', fontsize=14)
+    ax[0].imshow(blue_below_threshold, cmap='Blues')
+    ax[0].axis('off')
+    ax[1].set_title('Below Water Mask Threshold', fontsize=14)
+    ax[1].imshow(blue_above_threshold, cmap='Blues')
+    ax[1].axis('off')
+    fig.tight_layout()
+    fig.subplots_adjust(top=.8)
+
     fname = 'figures/water_mask.png'
     fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.05)
     print(f'{fname} saved')
@@ -159,7 +190,7 @@ def analyze_scenes(remove_first_image, water_mask_percentile,
         plot_images_and_masks(scene_arr)
 
     print('\nPlotting analysis figures')
-    plot_water_mask(scene_arr)
+    plot_ndvi_trends_water_mask(scene_arr)
     plot_ndvi_trends(scene_arr, remove_first_image=remove_first_image,
                      water_mask_percentile=water_mask_percentile)
 
