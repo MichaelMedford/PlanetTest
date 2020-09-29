@@ -70,6 +70,23 @@ def calculate_ndvi_stats(scene_arr, water_mask_percentile=50):
     return acquired_arr, ndvi_med_arr, ndvi_std_arr
 
 
+def calculate_ndvi_arr(scene_arr, apply_mask=True, water_mask_percentile=50):
+    mask_stack = calculate_stack_mask(scene_arr)
+
+    ndvi_arr = []
+    for scene in scene_arr:
+        mask_water = scene.calculate_percentile_mask('blue',
+                                                     water_mask_percentile)
+        mask_scene = np.logical_and(mask_stack, mask_water)
+        ndvi = scene.calculate_ndvi(convert_to_toa=True)
+        if apply_mask:
+            ndvi_arr.append(ndvi[mask_scene])
+        else:
+            ndvi_arr.append(ndvi.flatten())
+
+    return ndvi_arr
+
+
 def generate_delta_days(acquired_arr):
     delta_days_arr = []
     for i in range(len(acquired_arr) - 1):
@@ -79,6 +96,39 @@ def generate_delta_days(acquired_arr):
         delta_days = delta_seconds / (60 * 60 * 24)
         delta_days_arr.append(delta_days)
     return np.array(delta_days_arr)
+
+
+def plot_ndvi_hist(scene_arr, remove_first_image=False,
+                   water_mask_percentile=50):
+    ndvi_arr = calculate_ndvi_arr(scene_arr,
+                                  water_mask_percentile=water_mask_percentile)
+    ndvi_unmasked_arr = calculate_ndvi_arr(scene_arr, apply_mask=False)
+
+    bins = np.linspace(0.01, 1, 100)
+    fig, axes = plt.subplots(3, 2, figsize=(8, 6))
+    axes = axes.flatten()
+    fig.suptitle(f'NDIV Pixels', fontsize=14)
+    for i, ax in enumerate(axes):
+        scene = scene_arr[i]
+        ax.set_title(scene.acquired_label)
+        ax.hist(ndvi_arr[i], bins=bins, histtype='step', color='b',
+                label='Masked', lw=2, density=True)
+        ax.hist(ndvi_unmasked_arr[i], bins=bins, histtype='step', color='g',
+                label='No Mask', lw=2, density=True)
+        ax.grid(True)
+        ax.legend(loc=2)
+        ax.set_xlabel('NDVI', fontsize=12)
+        ax.set_ylabel('Relative Density', fontsize=12)
+
+    fig.tight_layout()
+    fig.subplots_adjust(top=.9)
+
+    fname = 'figures/ndvi_hist'
+    if remove_first_image:
+        fname += '_clipped'
+    fname += f'_blue{water_mask_percentile}.png'
+    fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.05)
+    print(f'{fname} saved')
 
 
 def plot_ndvi_trends(scene_arr, remove_first_image=False,
@@ -153,7 +203,7 @@ def plot_ndvi_trends_water_mask(scene_arr):
     print(f'{fname} saved')
 
 
-def plot_water_mask(scene_arr, water_mask_percentile):
+def plot_water_mask(scene_arr, water_mask_percentile=50):
     scene = scene_arr[0]
     blue = scene.images['blue']
     mask_water = scene.calculate_percentile_mask('blue',
@@ -190,6 +240,9 @@ def analyze_scenes(remove_first_image, water_mask_percentile,
         plot_images_and_masks(scene_arr)
 
     print('\nPlotting analysis figures')
+    plot_water_mask(scene_arr, water_mask_percentile=water_mask_percentile)
+    plot_ndvi_hist(scene_arr, remove_first_image=remove_first_image,
+                   water_mask_percentile=water_mask_percentile)
     plot_ndvi_trends_water_mask(scene_arr)
     plot_ndvi_trends(scene_arr, remove_first_image=remove_first_image,
                      water_mask_percentile=water_mask_percentile)
