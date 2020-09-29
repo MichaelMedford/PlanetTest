@@ -2,7 +2,7 @@
 
 """
 Measuring the rate of change from green vegetation to bare soil
-in the scenes of this stack requires a measurement of vegetative health.
+in the scenes of this strip requires a measurement of vegetative health.
 I have opted to use the Normalized Difference Vegetation Index, or NDVI,
 to make this measurement. NDVI is an industry standard for measuring
 vegetative health, leveraging the fact that vegetation absorbs light in the
@@ -18,8 +18,8 @@ vegatation, and a smaller NDVI indicates bare soil.
 
 Cleaning the data is required to get a pristine sample for measurement. This
 analysis script uses two masks, that are combined together for each scene:
-    1. A stack mask is created by finding pixels which are similarly `clean`
-       across all of the scenes in the stack. This is a conservative mask, as
+    1. A strip mask is created by finding pixels which are similarly `clean`
+       across all of the scenes in the strip. This is a conservative mask, as
        there are valuable pixels in a given scene that may  be clouded out in a
        separate scene. However this ensures that there are only good pixels in
        the final sample.
@@ -66,7 +66,7 @@ def load_scenes(remove_first_image=False):
     in order to keep as many epochs as possible.
 
     :param bool remove_first_image: If True, remove the first image from
-        the stack due to its missing rows. If false, clip the remaining
+        the strip due to its missing rows. If false, clip the remaining
         images by 15 rows to create a match in size between all scenes.
     :returns list Scene: List of scenes
     """
@@ -107,23 +107,23 @@ def plot_images_and_masks(scene_arr):
         scene.plot_udm2()
 
 
-def calculate_stack_mask(scene_arr):
+def calculate_strip_mask(scene_arr):
     """
     Creates a mask from the pixels that are marked `clear`
-    for all scenes in the stack.
+    for all scenes in the strip.
 
     :param list Scene scene_arr: List of scenes
     :returns None:
     """
     mask_arr = [s.udm2['clear'].astype(bool) for s in scene_arr]
-    stack_mask = np.logical_and.reduce(mask_arr)
-    return stack_mask
+    strip_mask = np.logical_and.reduce(mask_arr)
+    return strip_mask
 
 
 def calculate_ndvi_stats(scene_arr, water_mask_percentile=50):
     """
     Calculates the NDVI median and standard deviation for each scene
-    in the stack. A stack mask (see `calculate_stack_mask`) and a water mask
+    in the strip. A strip mask (see `calculate_strip_mask`) and a water mask
     are applied to each scene to generate a sample of pixels that are both
     reliable and contain vegetation.
 
@@ -132,7 +132,7 @@ def calculate_ndvi_stats(scene_arr, water_mask_percentile=50):
         blue pixels are masked
     :returns None:
     """
-    mask_stack = calculate_stack_mask(scene_arr)
+    mask_strip = calculate_strip_mask(scene_arr)
 
     # Find and characterize the NDVI pixels for each scene
     ndvi_med_arr = []
@@ -141,7 +141,7 @@ def calculate_ndvi_stats(scene_arr, water_mask_percentile=50):
     for scene in scene_arr:
         mask_water = scene.calculate_percentile_mask('blue',
                                                      water_mask_percentile)
-        mask_scene = np.logical_and(mask_stack, mask_water)
+        mask_scene = np.logical_and(mask_strip, mask_water)
         ndvi = scene.calculate_ndvi(convert_to_toa=True)
 
         ndvi_med_arr.append(np.median(ndvi[mask_scene]))
@@ -154,8 +154,8 @@ def calculate_ndvi_stats(scene_arr, water_mask_percentile=50):
 def calculate_ndvi_arr(scene_arr, apply_mask=True, water_mask_percentile=50):
     """
     Retrieve the NDVI pixels for each scene
-    in the stack. If apply_mask = True, a stack mask
-    (see `calculate_stack_mask`) and a water mask are applied to each scene
+    in the strip. If apply_mask = True, a strip mask
+    (see `calculate_strip_mask`) and a water mask are applied to each scene
     to generate a sample of pixels that are both reliable and contain
     vegetation.
 
@@ -165,14 +165,14 @@ def calculate_ndvi_arr(scene_arr, apply_mask=True, water_mask_percentile=50):
         blue pixels are masked
     :returns None:
     """
-    mask_stack = calculate_stack_mask(scene_arr)
+    mask_strip = calculate_strip_mask(scene_arr)
 
     # Find NDVI pixels for each scene
     ndvi_arr = []
     for scene in scene_arr:
         mask_water = scene.calculate_percentile_mask('blue',
                                                      water_mask_percentile)
-        mask_scene = np.logical_and(mask_stack, mask_water)
+        mask_scene = np.logical_and(mask_strip, mask_water)
         ndvi = scene.calculate_ndvi(convert_to_toa=True)
         if apply_mask:
             ndvi_arr.append(ndvi[mask_scene])
@@ -202,9 +202,9 @@ def generate_delta_days(acquired_arr):
 def plot_ndvi_hist(scene_arr, remove_first_image=False,
                    water_mask_percentile=50):
     """
-    Plot the NDVI pixels for each scene in the stack.
+    Plot the NDVI pixels for each scene in the strip.
 
-    If remove_first_image=True, remove the first image from the stack due to
+    If remove_first_image=True, remove the first image from the strip due to
     its missing rows. If False, clip the remaining images by 15 rows to
     create a match in size between all scenes.
 
@@ -215,7 +215,7 @@ def plot_ndvi_hist(scene_arr, remove_first_image=False,
 
     :param list Scene scene_arr: List of scenes
     :param bool remove_first_image: If True, remove the first image from
-        the stack due to its missing rows. If false, clip the remaining
+        the strip due to its missing rows. If false, clip the remaining
         images by 15 rows to create a match in size between all scenes.
     :param int water_mask_percentile: Percentile above which
         blue pixels are masked
@@ -255,10 +255,10 @@ def plot_ndvi_hist(scene_arr, remove_first_image=False,
 def plot_ndvi_trends(scene_arr, remove_first_image=False,
                      water_mask_percentile=50):
     """
-    Plot the NDVI trends across the entire stack, as well as the approximate
+    Plot the NDVI trends across the entire strip, as well as the approximate
     rate of change of the NDVI across the observations.
 
-    If remove_first_image=True, remove the first image from the stack due to
+    If remove_first_image=True, remove the first image from the strip due to
     its missing rows. If False, clip the remaining images by 15 rows to
     create a match in size between all scenes.
 
@@ -268,7 +268,7 @@ def plot_ndvi_trends(scene_arr, remove_first_image=False,
 
     :param list Scene scene_arr: List of scenes
     :param bool remove_first_image: If True, remove the first image from
-        the stack due to its missing rows. If false, clip the remaining
+        the strip due to its missing rows. If false, clip the remaining
         images by 15 rows to create a match in size between all scenes.
     :param int water_mask_percentile: Percentile above which
         blue pixels are masked
@@ -316,9 +316,9 @@ def plot_ndvi_trends(scene_arr, remove_first_image=False,
 
 def plot_ndvi_trends_water_mask(scene_arr):
     """
-    Plot the NDVI trends across the entire stack and demonstrate the
+    Plot the NDVI trends across the entire strip and demonstrate the
     effect of applying a water mask to the images. Both curves have
-    the stack mask applied.
+    the strip mask applied.
 
     The application of the water mask reduces the uncertainty in the
     measurement, while maintaining the same evolution of the curve.
@@ -357,7 +357,7 @@ def plot_ndvi_trends_water_mask(scene_arr):
 
 def plot_water_mask(scene_arr, water_mask_percentile=50):
     """
-    Plot the water mask for the first scene in the stack.
+    Plot the water mask for the first scene in the strip.
 
     The water mask threshold is calculated by taking a percentile of the blue
     pixels in the image. For example `mwater_mask_percentile=50` calculates
@@ -418,7 +418,7 @@ def analyze_scenes(remove_first_image, water_mask_percentile,
     requiring them to be of the same extent. However the first image is 15 rows
     short, requiring either (1) removing the first image from the analysis,
     or (2) clipping the remaining scenes by 15 rows. If
-    remove_first_image=True, remove the first image from the stack due to
+    remove_first_image=True, remove the first image from the strip due to
     its missing rows. If False, clip the remaining images by 15 rows to
     create a match in size between all scenes.
 
@@ -436,7 +436,7 @@ def analyze_scenes(remove_first_image, water_mask_percentile,
     region.
 
     :param bool remove_first_image: If True, remove the first image from
-        the stack due to its missing rows. If false, clip the remaining
+        the strip due to its missing rows. If false, clip the remaining
         images by 15 rows to create a match in size between all scenes.
     :param int water_mask_percentile: Percentile above which
         blue pixels are masked
@@ -470,13 +470,13 @@ def main():
                         action='store_false', help=help_str)
     parser.set_defaults(skip_plot_image_masks=False)
 
-    help_str = 'A stack mask is constructed by finding the "clear" pixels ' \
+    help_str = 'A strip mask is constructed by finding the "clear" pixels ' \
                'that all scenes in the set of imaages have in common. ' \
                'The first analysis has 15 less rows than the remaining ' \
                'images, despite being clipped to the same extent. ' \
                'Activating this flag removes the first image from the ' \
                'analysis. If not selected, the remaining scenes are ' \
-               'clipped by 15 rows to generate a stack mask.'
+               'clipped by 15 rows to generate a strip mask.'
     parser.add_argument('--remove-first-image',
                         action='store_true', help=help_str)
     parser.set_defaults(remove_first_image=False)
