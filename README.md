@@ -16,6 +16,20 @@ dark in red (due to absorption) and bright in NIR (due to reflection),
 leading to a large NDVI. Therefore a larger NDVI indicates more green
 vegatation, and a smaller NDVI indicates bare soil.
 
+### Top of Atmosphere Reflectance
+
+The scenes provided are radiometrically calibrated `analytic` data products.
+However NDVI is best suited for use with reflectance data, which measures 
+the relative fraction of incoming light which is reflected within a pixel. 
+Reflectance data ranges from 0 to 1, thereby bounding NDVI from -1 to 1. 
+
+The `metadata_xml` files contain the coefficients for converting the 
+`analytic` pixel values to top of atmosphere reflectance. These coefficients 
+are fetched by the `Scene` class and applied to the `red` and `NIR` band 
+values in the calculation of NDIV. The user is exposued to a `convert_to_toa` 
+flag that may be set to `False` to calculate NDVI without applying these 
+coefficients. 
+
 ### Masks
 Cleaning the data is required to get a pristine sample for measurement. This
 analysis script uses two masks, that are combined together for each scene:
