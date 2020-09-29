@@ -7,7 +7,7 @@ throughout the analysis. For analysis of the scenes using these tools, please
 read the `Analysis.ipynb`. For figures that are the results of this 
 analysis, please see the `figures` folder. Running the analysis scripts 
 can be done with `python analysis.py`. Execution  of this script assumes that 
-the data products provided are location in the `data` folder.
+the data products provided are located in the `data` folder.
 
 ### Measuring Vegetative Health
 Measuring the rate of change from green vegetation to bare soil
@@ -80,7 +80,7 @@ the scenes, with and without masks.
 
 The `analysis.py` script loads images into memory as instances of 
 `product.py:Scene` and generates plots for analysis and diagnostics. Execution 
-of this script assumes that the data products provided are location in 
+of this script assumes that the data products provided are located in 
 `PLanetTest/data`
 
 Options for running the script can be seen with
