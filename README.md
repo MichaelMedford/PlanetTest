@@ -67,5 +67,8 @@ An example execution would be
     python analysis.py -water-mask-percentile 50
     
 Plots of the scene images and masks are generated into the `data` folder, 
-while analysis figures are generated in the `figures` folder.
+while analysis figures are generated in the `figures` folder. The mask plots 
+are useful to inspect individual scenes for inaccurate masks. It was through 
+this inspection that the `clear` mask was determined to be of good quality 
+for all scenes in the strip.
    
