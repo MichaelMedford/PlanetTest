@@ -334,9 +334,9 @@ def plot_ndvi_trends_water_mask(scene_arr):
     fig, ax = plt.subplots(figsize=(8, 6))
     fig.suptitle('Presence of Green Vegetation')
     ax.errorbar(acquired_arr, ndvi_med_arr_raw, yerr=ndvi_std_arr_raw,
-                color='g', label='No Water Mask', lw=5)
+                color='g', label='No Water Mask', lw=5, zorder=1)
     ax.errorbar(acquired_arr, ndvi_med_arr_clipped, yerr=ndvi_std_arr_clipped,
-                color='b', label='50 Percentile Water Mask', lw=5)
+                color='b', label='50 Percentile Water Mask', lw=5, zorder=2)
     ax.set_xlabel('Observation Date')
     ax.set_ylabel('NDVI')
     ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
@@ -393,7 +393,8 @@ def plot_water_mask(scene_arr, water_mask_percentile=50):
     blue_above_threshold[~mask_water] = 0
 
     fig, ax = plt.subplots(1, 2, figsize=(6, 3))
-    fig.suptitle('Effect of Water Mask')
+    fig.suptitle(f'Effect of Water Mask | '
+                 f'{water_mask_percentile} Percentile', fontsize=14)
     ax[0].set_title('Above Water Mask Threshold', fontsize=14)
     ax[0].imshow(blue_below_threshold, cmap='Blues')
     ax[0].axis('off')
@@ -403,7 +404,7 @@ def plot_water_mask(scene_arr, water_mask_percentile=50):
     fig.tight_layout()
     fig.subplots_adjust(top=.8)
 
-    fname = 'figures/water_mask.png'
+    fname = f'figures/water_mask_blue{water_mask_percentile}.png'
     fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.05)
     print(f'{fname} saved')
 

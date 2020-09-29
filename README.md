@@ -1,5 +1,11 @@
 # Measuring Green Vegetation
 
+### Outline
+
+This document outlines the implementation of the functions used 
+throughout the analysis. For analysis of the scenes using these tools, please 
+read the **Analysis.ipynb**.
+
 ### Measuring Vegetative Health
 Measuring the rate of change from green vegetation to bare soil
 in the scenes of this strip requires a measurement of vegetative health.
@@ -70,7 +76,9 @@ the scenes, with and without masks.
 ### Generating Plots
 
 The `analysis.py` script loads images into memory as instances of 
-`product.py:Scene` and generates plots for analysis and diagnostics.
+`product.py:Scene` and generates plots for analysis and diagnostics. Execution 
+of this script assumes that the data products provided are location in 
+`PLanetTest/data`
 
 Options for running the script can be seen with
 
