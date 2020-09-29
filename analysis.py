@@ -147,7 +147,6 @@ def plot_water_mask(scene_arr):
     fig.tight_layout()
     fig.subplots_adjust(top=.9)
 
-
     fname = 'figures/water_mask.png'
     fig.savefig(fname, dpi=75, bbox_inches='tight', pad_inches=0.05)
     print(f'{fname} saved')
@@ -166,9 +165,10 @@ def analyze_scenes(remove_first_image, water_mask_percentile,
 
 
 def main():
+    formatter = argparse.ArgumentDefaultsHelpFormatter
     parser = argparse.ArgumentParser(description='Analyze scenes for '
                                                  'vegetation trends.',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                     formatter_class=formatter)
 
     help_str = 'This analysis script generates plots of the images and ' \
                'masks for each scene. This flag skips that output.'

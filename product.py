@@ -83,8 +83,10 @@ class Scene(object):
         return self.images['red'].shape
 
     def _load_toa_reflectance_coeff(self, band_idx):
-        nodes = self.metadata_xml.getElementsByTagName("ps:bandSpecificMetadata")
-        coeff = nodes[band_idx].getElementsByTagName("ps:reflectanceCoefficient")[0].firstChild.data
+        tag_name = "ps:bandSpecificMetadata"
+        node = self.metadata_xml.getElementsByTagName(tag_name)[band_idx]
+        tag_name = "ps:reflectanceCoefficient"
+        coeff = node.getElementsByTagName(tag_name)[0].firstChild.data
         return float(coeff)
 
     def _load_scene_toa_reflectance(self, image_band):
