@@ -6,7 +6,7 @@ This README outlines the implementation of the functions used
 throughout the analysis. For analysis of the scenes using these tools, please 
 read the `Analysis.ipynb`. For figures that are the results of this 
 analysis, please see the `figures` folder. Running the analysis scripts 
-can be done with `pythong analysis.py`. Execution  of this script assumes that 
+can be done with `python analysis.py`. Execution  of this script assumes that 
 the data products provided are location in the `data` folder.
 
 ### Measuring Vegetative Health
